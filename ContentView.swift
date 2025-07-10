@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import AVFoundation
 import AudioToolbox
 
@@ -9,6 +10,10 @@ struct ContentView: View {
     @State private var result: String = ""
     @State private var animateBackground = false
     @State private var shimmerOffset: CGFloat = -100
+    @State private var shareMessage: String = ""
+    @State private var isSharePresented = false
+    @State private var capturedImage: UIImage?
+    @State private var shareItems: [Any] = []
     
     var body: some View {
         ZStack {
@@ -31,8 +36,50 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     
+                    // SNSシェアボタン
+                    VStack(spacing: 8) {
+                        Text("このアプリが役立ったら、ぜひ友達にもシェアしてください！")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        
+                        HStack(spacing: 20) {
+                            Button(action: {
+                                // Xシェア処理
+                            }) {
+                                Image("icon_x") // Add custom asset named icon_x
+                                    .resizable()
+                                    .frame(width: 44, height: 44)
+                            }
+                            
+                            Button(action: {
+                                // LINEシェア処理
+                            }) {
+                                Image("icon_line") // Add custom asset named icon_line
+                                    .resizable()
+                                    .frame(width: 44, height: 44)
+                            }
+                            
+                            Button(action: {
+                                // Facebookシェア処理
+                            }) {
+                                Image("icon_facebook") // Add custom asset named icon_facebook
+                                    .resizable()
+                                    .frame(width: 44, height: 44)
+                            }
+                            
+                            Button(action: {
+                                // Instagramシェア処理
+                            }) {
+                                Image("icon_instagram") // Add custom asset named icon_instagram
+                                    .resizable()
+                                    .frame(width: 44, height: 44)
+                            }
+                        }
+                    }
+                    .padding(.top, 24)
+                    
                     // タイトル＆キャラクター
-                    Text("ShakiShaki 償却")
+                    Text("ひわりん")
                         .font(.system(size: 34, weight: .bold, design: .serif))
                         .foregroundColor(Color(red: 0.72, green: 0.60, blue: 0.36)) // gold
                         .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
@@ -41,38 +88,46 @@ struct ContentView: View {
                         .frame(width: 100, height: 100)
                     
                     // 入力フォーム
-                    VStack(alignment: .leading, spacing: 10) {
-                        TextField("資産名（例：MacBook）", text: $assetName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .foregroundColor(.purple)
-                        
-                        TextField("価格（円）", text: $assetPrice)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .foregroundColor(.purple)
-                        
-                        TextField("耐用年数（年）", text: $usefulLife)
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .foregroundColor(.purple)
+                    VStack {
+                        VStack(alignment: .leading, spacing: 10) {
+                            TextField("資産名（例：MacBook）", text: $assetName)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .foregroundColor(.purple)
+                            
+                            TextField("価格（円）", text: $assetPrice)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .foregroundColor(.purple)
+                            
+                            TextField("耐用年数（年）", text: $usefulLife)
+                                .keyboardType(.numberPad)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .foregroundColor(.purple)
+                        }
+                        .frame(maxWidth: 300)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.white.opacity(0.5))
+                                .shadow(color: .gray.opacity(0.3), radius: 5, x: 0, y: 3)
+                        )
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.white.opacity(0.5))
-                            .shadow(color: .gray.opacity(0.3), radius: 5, x: 0, y: 3)
-                    )
+                    .padding(.horizontal, 24)
                     
                     // 計算ボタン
-                    Button(action: calculate) {
-                        Text("しゃきっと計算！")
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color(red: 0.85, green: 0.70, blue: 0.40))
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 4)
+                    HStack {
+                        Button(action: calculate) {
+                            Text("ひわりんで日割り！")
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color(red: 0.85, green: 0.70, blue: 0.40))
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                                .shadow(radius: 4)
+                        }
                     }
+                    .frame(maxWidth: 300)
+                    .padding(.horizontal, 24)
                     
                     // 結果表示
                     if !result.isEmpty {
@@ -86,56 +141,33 @@ struct ContentView: View {
                                 .background(Color(red: 0.98, green: 0.96, blue: 0.92))
                                 .cornerRadius(10)
                             
-                            // 自己肯定メッセージ
-                            Text("これは1日あたりの自己投資額です✨")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                            
                         }
-                        .padding()
                     }
                     
-                    // しゅわしゅわ円グラフ（リッチなラグジュアリー感）
-                    ZStack {
-                        Circle()
-                            .trim(from: 0, to: 0.7)
-                            .stroke(
-                                AngularGradient(
-                                    gradient: Gradient(colors: [Color(red: 0.75, green: 0.60, blue: 0.35), Color(red: 0.93, green: 0.87, blue: 0.72)]),
-                                    center: .center
-                                ),
-                                style: StrokeStyle(lineWidth: 24, lineCap: .round, lineJoin: .round)
-                            )
-                            .rotationEffect(.degrees(-90))
-                            .shadow(color: Color(red: 0.75, green: 0.60, blue: 0.35).opacity(0.3), radius: 8, x: 0, y: 4)
-                            .frame(width: 140, height: 140)
-                        
-                        Circle()
-                            .fill(Color.white.opacity(0.15))
-                            .frame(width: 60, height: 60)
-                            .offset(x: shimmerOffset, y: shimmerOffset)
-                            .blur(radius: 2)
-                            .animation(.easeInOut(duration: 2.5).repeatForever(autoreverses: true), value: shimmerOffset)
-                        
-                        VStack(spacing: 4) {
-                            Text("償却率")
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            Text("70%")
-                                .font(.system(size: 24, weight: .bold))
-                                .foregroundColor(Color(red: 0.75, green: 0.60, blue: 0.35))
+                    if !shareMessage.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("SNS投稿テンプレ")
+                                .font(.headline)
+                            Text(shareMessage)
+                                .font(.system(size: 14, design: .monospaced))
+                                .padding()
+                                .background(Color.white.opacity(0.3))
+                                .cornerRadius(12)
+                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.2)))
                         }
+                        .padding(.horizontal, 24)
                     }
-                    .padding(.top, 24)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.white.opacity(0.8))
-                            .shadow(radius: 5)
-                    )
-                    .padding()
                     
                     // シェアボタン
                     Button(action: {
-                        // シェア画像生成機能（後で追加）
+                        captureScreen()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            if let image = capturedImage {
+                                isSharePresented = true
+                                shareItems = [shareMessage, image]
+                            }
+                        }
                     }) {
                         Text("SNSでシェアする")
                             .padding()
@@ -144,27 +176,22 @@ struct ContentView: View {
                             .cornerRadius(10)
                             .shadow(radius: 4)
                     }
-                    
-                    // 広告 or プレミアム誘導
-                    VStack {
-                        Divider()
-                        Text("🚀 プレミアムで透かしなし保存！")
-                            .font(.footnote)
-                            .foregroundColor(.blue)
-                            .padding(8)
-                            .background(Color.white.opacity(0.6))
-                            .cornerRadius(8)
-                            .shadow(radius: 2)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
+                    .sheet(isPresented: $isSharePresented) {
+                        ShareSheet(activityItems: shareItems)
                     }
                     
+                    
                 }
-                .padding()
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .background(
                     RoundedRectangle(cornerRadius: 32)
                         .fill(Color(red: 0.99, green: 0.98, blue: 0.95))
                         .shadow(color: .gray.opacity(0.15), radius: 10, x: 0, y: 5)
                 )
-                .padding()
+                .padding(.vertical, 16)
             }
         }
         .navigationTitle("減価償却メーカー")
@@ -186,9 +213,41 @@ struct ContentView: View {
         let dailyCost = price / totalDays
         result = "1日あたり約¥\(Int(dailyCost))です！"
         
+        shareMessage = """
+        🧮 この買い物、日割りにしたらまさかの “¥\(Int(dailyCost))/日” ✨
+        
+        📦 \(assetName)（¥\(Int(price))) / 耐用年数：\(Int(years))年
+        👉 つまり、毎日コーヒー1杯より安く、創作力バフ中。
+        
+        #ひわりん #日割り計算 #自己投資は正義 #浪費じゃなくて未来投資
+        """
+        
+        captureScreen()
+        
         // Hapticとサウンド（仮）
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         AudioServicesPlaySystemSound(1007) // チャリン音（仮）
     }
+}
+
+extension ContentView {
+    func captureScreen() {
+        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+        let renderer = UIGraphicsImageRenderer(bounds: window?.bounds ?? .zero)
+        let image = renderer.image { ctx in
+            window?.layer.render(in: ctx.cgContext)
+        }
+        capturedImage = image
+    }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        return UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
