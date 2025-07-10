@@ -4,19 +4,29 @@ import AVFoundation
 import AudioToolbox
 
 struct ContentView: View {
+    // MARK: - 入力関連の状態
     @State private var assetName: String = ""
     @State private var assetPrice: String = ""
     @State private var usefulLife: String = ""
+    
+    // MARK: - 計算結果関連の状態
     @State private var result: String = ""
+    
+    // MARK: - アニメーション関連の状態
     @State private var animateBackground = false
     @State private var shimmerOffset: CGFloat = -100
+    
+    // MARK: - シェア関連の状態
     @State private var shareMessage: String = ""
     @State private var isSharePresented = false
     @State private var capturedImage: UIImage?
     @State private var shareItems: [Any] = []
     
+    @State private var showPopup = false
+    
     var body: some View {
         ZStack {
+            // MARK: - 背景
             ZStack {
                 Image("notebook_background")
                     .resizable()
@@ -36,49 +46,7 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     
-                    // SNSシェアボタン
-                    VStack(spacing: 8) {
-                        Text("このアプリが役立ったら、ぜひ友達にもシェアしてください！")
-                            .font(.footnote)
-                            .foregroundColor(.gray)
-                        
-                        HStack(spacing: 20) {
-                            Button(action: {
-                                // Xシェア処理
-                            }) {
-                                Image("icon_x") // Add custom asset named icon_x
-                                    .resizable()
-                                    .frame(width: 44, height: 44)
-                            }
-                            
-                            Button(action: {
-                                // LINEシェア処理
-                            }) {
-                                Image("icon_line") // Add custom asset named icon_line
-                                    .resizable()
-                                    .frame(width: 44, height: 44)
-                            }
-                            
-                            Button(action: {
-                                // Facebookシェア処理
-                            }) {
-                                Image("icon_facebook") // Add custom asset named icon_facebook
-                                    .resizable()
-                                    .frame(width: 44, height: 44)
-                            }
-                            
-                            Button(action: {
-                                // Instagramシェア処理
-                            }) {
-                                Image("icon_instagram") // Add custom asset named icon_instagram
-                                    .resizable()
-                                    .frame(width: 44, height: 44)
-                            }
-                        }
-                    }
-                    .padding(.top, 24)
-                    
-                    // タイトル＆キャラクター
+                    // MARK: - タイトル＆キャラクター
                     Text("ひわりん")
                         .font(.system(size: 34, weight: .bold, design: .serif))
                         .foregroundColor(Color(red: 0.72, green: 0.60, blue: 0.36)) // gold
@@ -87,22 +55,31 @@ struct ContentView: View {
                         .resizable()
                         .frame(width: 100, height: 100)
                     
-                    // 入力フォーム
+                    // MARK: - 入力フォーム
                     VStack {
                         VStack(alignment: .leading, spacing: 10) {
                             TextField("資産名（例：MacBook）", text: $assetName)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .foregroundColor(.purple)
+                                .padding(.horizontal, 12)
+                                .frame(height: 44)
+                                .background(Color(UIColor.systemGray6))
+                                .cornerRadius(8)
+                                .foregroundColor(.primary)
                             
                             TextField("価格（円）", text: $assetPrice)
                                 .keyboardType(.numberPad)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .foregroundColor(.purple)
+                                .padding(.horizontal, 12)
+                                .frame(height: 44)
+                                .background(Color(UIColor.systemGray6))
+                                .cornerRadius(8)
+                                .foregroundColor(.primary)
                             
                             TextField("耐用年数（年）", text: $usefulLife)
                                 .keyboardType(.numberPad)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .foregroundColor(.purple)
+                                .padding(.horizontal, 12)
+                                .frame(height: 44)
+                                .background(Color(UIColor.systemGray6))
+                                .cornerRadius(8)
+                                .foregroundColor(.primary)
                         }
                         .frame(maxWidth: 300)
                         .padding(.vertical, 16)
@@ -114,7 +91,7 @@ struct ContentView: View {
                     }
                     .padding(.horizontal, 24)
                     
-                    // 計算ボタン
+                    // MARK: - 計算ボタン
                     HStack {
                         Button(action: calculate) {
                             Text("ひわりんで日割り！")
@@ -129,37 +106,29 @@ struct ContentView: View {
                     .frame(maxWidth: 300)
                     .padding(.horizontal, 24)
                     
-                    // 結果表示
+                    // MARK: - 結果表示
                     if !result.isEmpty {
                         VStack(spacing: 12) {
                             Text("結果：")
                                 .font(.headline)
                             Text(result)
-                                .font(.title2)
+                                .font(.title)
                                 .multilineTextAlignment(.center)
                                 .padding()
-                                .background(Color(red: 0.98, green: 0.96, blue: 0.92))
-                                .cornerRadius(10)
-                            
-                            
-                        }
-                    }
-                    
-                    if !shareMessage.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("SNS投稿テンプレ")
-                                .font(.headline)
-                            Text(shareMessage)
-                                .font(.system(size: 14, design: .monospaced))
-                                .padding()
-                                .background(Color.white.opacity(0.3))
+                                .foregroundColor(.white)
+                                .background(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [Color(red: 0.4, green: 0.8, blue: 0.9), Color(red: 0.2, green: 0.6, blue: 0.8)]),
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
                                 .cornerRadius(12)
-                                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.2)))
+                                .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
                         }
-                        .padding(.horizontal, 24)
                     }
                     
-                    // シェアボタン
+                    // MARK: - シェアボタン
                     Button(action: {
                         captureScreen()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -182,7 +151,6 @@ struct ContentView: View {
                         ShareSheet(activityItems: shareItems)
                     }
                     
-                    
                 }
                 .padding(.vertical, 16)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -194,6 +162,57 @@ struct ContentView: View {
                 .padding(.vertical, 16)
             }
         }
+        .overlay(
+            Group {
+                if showPopup {
+                    ZStack {
+                        Color.black
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                showPopup = false
+                            }
+                        
+                        VStack(spacing: 16) {
+                            VStack(spacing: 8) {
+                                if !assetName.isEmpty {
+                                    Text(assetName)
+                                        .font(.title2)
+                                        .foregroundColor(.white)
+                                        .bold()
+                                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+                                }
+                                Text(result)
+                                    .font(.system(size: 36, weight: .heavy, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 32)
+                                    .padding(.vertical, 20)
+                            }
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 40)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color(red: 0.95, green: 0.8, blue: 0.5), Color(red: 0.8, green: 0.6, blue: 0.4)]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 8)
+                                    .frame(minHeight: 240)
+                            )
+                            
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .transition(.scale)
+                }
+            }
+        )
         .navigationTitle("減価償却メーカー")
         .onAppear {
             animateBackground = true
@@ -201,7 +220,7 @@ struct ContentView: View {
         }
     }
     
-    // 計算ロジック
+    // MARK: - 計算ロジック
     func calculate() {
         guard let price = Double(assetPrice),
               let years = Double(usefulLife),
@@ -211,8 +230,21 @@ struct ContentView: View {
         }
         let totalDays = years * 365
         let dailyCost = price / totalDays
-        result = "1日あたり約¥\(Int(dailyCost))です！"
+        result = "1日あたり約\(Int(dailyCost))円！"
         
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        
+        showPopup = true
+        
+        updateShareMessage(price: price, years: years, dailyCost: dailyCost)
+        captureScreen()
+        
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        AudioServicesPlaySystemSound(1007) // チャリン音（仮）
+    }
+    
+    func updateShareMessage(price: Double, years: Double, dailyCost: Double) {
         shareMessage = """
         🧮 この買い物、日割りにしたらまさかの “¥\(Int(dailyCost))/日” ✨
         
@@ -221,24 +253,69 @@ struct ContentView: View {
         
         #ひわりん #日割り計算 #自己投資は正義 #浪費じゃなくて未来投資
         """
-        
-        captureScreen()
-        
-        // Hapticとサウンド（仮）
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-        AudioServicesPlaySystemSound(1007) // チャリン音（仮）
     }
 }
 
 extension ContentView {
     func captureScreen() {
         let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-        let renderer = UIGraphicsImageRenderer(bounds: window?.bounds ?? .zero)
-        let image = renderer.image { ctx in
-            window?.layer.render(in: ctx.cgContext)
+        
+        if let rootView = window?.rootViewController?.view {
+            let popupView = UIHostingController(
+                rootView:
+                    ZStack {
+                        Color.black
+                            .ignoresSafeArea()
+                        
+                        VStack(spacing: 16) {
+                            VStack(spacing: 8) {
+                                if !assetName.isEmpty {
+                                    Text(assetName)
+                                        .font(.title2)
+                                        .foregroundColor(.white)
+                                        .bold()
+                                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+                                }
+                                Text(result)
+                                    .font(.system(size: 36, weight: .heavy, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 32)
+                                    .padding(.vertical, 20)
+                            }
+                            .padding(.horizontal, 32)
+                            .padding(.vertical, 40)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [Color(red: 0.95, green: 0.8, blue: 0.5), Color(red: 0.8, green: 0.6, blue: 0.4)]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 24)
+                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 8)
+                                    .frame(minHeight: 240)
+                            )
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    }
+            ).view
+            
+            let targetSize = rootView.bounds.size
+            popupView?.bounds = CGRect(origin: .zero, size: targetSize)
+            popupView?.backgroundColor = .clear
+            
+            let renderer = UIGraphicsImageRenderer(size: targetSize)
+            let image = renderer.image { context in
+                popupView?.drawHierarchy(in: popupView!.bounds, afterScreenUpdates: true)
+            }
+            
+            capturedImage = image
         }
-        capturedImage = image
     }
 }
 
