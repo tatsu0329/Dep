@@ -166,59 +166,74 @@ struct ContentView: View {
         .overlay(
             Group {
                 if showPopup {
-                    ZStack {
-                        // 背景ぼかし＆暗色
-                        Color.black.opacity(0.5)
-                            .ignoresSafeArea()
-                        
-                        // キラキラアニメーション
-                        VStack {
-                            LottieView(animationName: "SparkleBurst")
-                                .frame(width: 300, height: 300)
-                                .blendMode(.normal) // or .plusLighter
-                                .onAppear {
-                                    print("✅ LottieView appeared")
-                                }
-                        }
-                        .zIndex(1)
-                        
-                        VStack(spacing: 16) {
-                            VStack(spacing: 8) {
-                                if !assetName.isEmpty {
-                                    Text(assetName)
-                                        .font(.title2)
+                    Button(action: { showPopup = false }) {
+                        ZStack {
+                            // 背景ぼかし＆暗色 (より強いブラー+不透明度)
+                            Color.white
+                                .blur(radius: 90)
+                                .opacity(1.0)
+                                .ignoresSafeArea()
+                                .zIndex(0)
+                            
+                            // AutoCrew2 アニメーション
+                            LottieView(animationName: "AutoCrew2")
+                                .ignoresSafeArea()
+                                .zIndex(0)
+                            
+                            // ポップアップ本体
+                            VStack(spacing: 16) {
+                                VStack(spacing: 8) {
+                                    if !assetName.isEmpty {
+                                        Text(assetName)
+                                            .font(.title2)
+                                            .foregroundColor(.white)
+                                            .bold()
+                                            .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+                                    }
+                                    Text(result)
+                                        .font(.system(size: 36, weight: .heavy, design: .rounded))
                                         .foregroundColor(.white)
-                                        .bold()
-                                        .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
+                                        .padding(.horizontal, 32)
+                                        .padding(.vertical, 20)
                                 }
-                                Text(result)
-                                    .font(.system(size: 36, weight: .heavy, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 32)
-                                    .padding(.vertical, 20)
-                            }
-                            .padding(.horizontal, 32)
-                            .padding(.vertical, 40)
-                            .background(
-                                RoundedRectangle(cornerRadius: 24)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [Color(red: 0.95, green: 0.8, blue: 0.5), Color(red: 0.8, green: 0.6, blue: 0.4)]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 40)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 24)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [Color(red: 0.95, green: 0.8, blue: 0.5), Color(red: 0.8, green: 0.6, blue: 0.4)]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
                                         )
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 24)
-                                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                                    )
-                                    .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 8)
-                                    .frame(minHeight: 240)
-                            )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 24)
+                                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        )
+                                        .shadow(color: .black.opacity(0.4), radius: 16, x: 0, y: 8)
+                                        .frame(minHeight: 240)
+                                )
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture { }
+                            .zIndex(1)
+                            
+                            // キラキラアニメーション（最前面に）
+                            VStack {
+                                LottieView(animationName: "SparkleBurst")
+                                    .frame(width: 300, height: 300)
+                                    .blendMode(.normal)
+                                    .onAppear {
+                                        print("✅ LottieView appeared")
+                                    }
+                            }
+                            .zIndex(2)
                         }
-                        .zIndex(0)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .buttonStyle(PlainButtonStyle())
+                    .background(Color.clear)
                     .transition(.scale)
                 }
             }
