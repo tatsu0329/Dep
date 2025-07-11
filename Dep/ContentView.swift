@@ -29,12 +29,6 @@ struct ContentView: View {
         ZStack {
             // MARK: - 背景
             ZStack {
-                Image("notebook_background")
-                    .resizable()
-                    .scaledToFill()
-                    .opacity(0.15)
-                    .ignoresSafeArea()
-                
                 LinearGradient(
                     gradient: Gradient(colors: [Color(red: 0.95, green: 0.93, blue: 0.88), Color.white]),
                     startPoint: animateBackground ? .topLeading : .bottomTrailing,
@@ -52,9 +46,6 @@ struct ContentView: View {
                         .font(.system(size: 34, weight: .bold, design: .serif))
                         .foregroundColor(Color(red: 0.72, green: 0.60, blue: 0.36)) // gold
                         .shadow(color: .black.opacity(0.1), radius: 1, x: 0, y: 1)
-                    Image("shakimaru")
-                        .resizable()
-                        .frame(width: 100, height: 100)
                     
                     // MARK: - 入力フォーム
                     VStack {
@@ -66,13 +57,25 @@ struct ContentView: View {
                                 .cornerRadius(8)
                                 .foregroundColor(.primary)
                             
-                            TextField("価格（円）", text: $assetPrice)
-                                .keyboardType(.numberPad)
-                                .padding(.horizontal, 12)
-                                .frame(height: 44)
-                                .background(Color(UIColor.systemGray6))
-                                .cornerRadius(8)
-                                .foregroundColor(.primary)
+                            TextField("価格（円）", text: Binding(
+                                get: {
+                                    let formatter = NumberFormatter()
+                                    formatter.numberStyle = .decimal
+                                    if let number = Double(assetPrice.replacingOccurrences(of: ",", with: "")) {
+                                        return formatter.string(from: NSNumber(value: number)) ?? assetPrice
+                                    }
+                                    return assetPrice
+                                },
+                                set: { newValue in
+                                    assetPrice = newValue.replacingOccurrences(of: ",", with: "")
+                                }
+                            ))
+                            .keyboardType(.numberPad)
+                            .padding(.horizontal, 12)
+                            .frame(height: 44)
+                            .background(Color(UIColor.systemGray6))
+                            .cornerRadius(8)
+                            .foregroundColor(.primary)
                             
                             TextField("耐用年数（年）", text: $usefulLife)
                                 .keyboardType(.numberPad)
@@ -112,20 +115,27 @@ struct ContentView: View {
                         VStack(spacing: 12) {
                             Text("結果：")
                                 .font(.headline)
-                            Text(result)
-                                .font(.title)
-                                .multilineTextAlignment(.center)
-                                .padding()
+                            VStack {
+                                VStack {
+                                    
+                                    Text(result)
+                                    
+                                    
+                                }
+                                .font(.system(size: 36, weight: .heavy, design: .rounded))
                                 .foregroundColor(.white)
-                                .background(
-                                    LinearGradient(
-                                        gradient: Gradient(colors: [Color(red: 0.4, green: 0.8, blue: 0.9), Color(red: 0.2, green: 0.6, blue: 0.8)]),
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
+                                .multilineTextAlignment(.center)
+                            }
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [Color(red: 0.4, green: 0.8, blue: 0.9), Color(red: 0.2, green: 0.6, blue: 0.8)]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
                                 )
-                                .cornerRadius(12)
-                                .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
+                            )
+                            .cornerRadius(12)
+                            .shadow(color: .gray.opacity(0.4), radius: 4, x: 0, y: 2)
                         }
                     }
                     
@@ -170,7 +180,7 @@ struct ContentView: View {
                         ZStack {
                             // 背景ぼかし＆暗色 (より強いブラー+不透明度)
                             Color.white
-                                .blur(radius: 90)
+                                .blur(radius: 20)
                                 .opacity(1.0)
                                 .ignoresSafeArea()
                                 .zIndex(0)
@@ -190,11 +200,15 @@ struct ContentView: View {
                                             .bold()
                                             .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
                                     }
-                                    Text(result)
-                                        .font(.system(size: 36, weight: .heavy, design: .rounded))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 32)
-                                        .padding(.vertical, 20)
+                                    VStack {
+                                        Text("1日あたり")
+                                        Text(result.replacingOccurrences(of: "1日あたり", with: ""))
+                                    }
+                                    .font(.system(size: 36, weight: .heavy, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
+                                    .padding(.vertical, 20)
                                 }
                                 .padding(.horizontal, 32)
                                 .padding(.vertical, 40)
@@ -255,7 +269,11 @@ struct ContentView: View {
         }
         let totalDays = years * 365
         let dailyCost = price / totalDays
-        result = "1日あたり約\(Int(dailyCost))円！"
+        result = "1日あたり"
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        let formattedCost = numberFormatter.string(from: NSNumber(value: Int(dailyCost))) ?? "\(Int(dailyCost))"
+        result += "約\(formattedCost)円！"
         
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         
@@ -301,11 +319,15 @@ extension ContentView {
                                         .bold()
                                         .shadow(color: .black.opacity(0.3), radius: 2, x: 0, y: 2)
                                 }
-                                Text(result)
-                                    .font(.system(size: 36, weight: .heavy, design: .rounded))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 32)
-                                    .padding(.vertical, 20)
+                                VStack {
+                                    Text("1日あたり")
+                                    Text(result.replacingOccurrences(of: "1日あたり", with: ""))
+                                }
+                                .font(.system(size: 36, weight: .heavy, design: .rounded))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 20)
                             }
                             .padding(.horizontal, 32)
                             .padding(.vertical, 40)
